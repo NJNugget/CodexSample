@@ -10,38 +10,12 @@
     <header class="app-header">
       <h1>餐厅预订管理系统</h1>
       <div class="toolbar">
-        <button id="refreshButton" class="secondary">刷新</button>
-        <button id="toggleAdmin" class="secondary">后台管理</button>
+
       </div>
     </header>
 
     <main>
       <section id="floorsContainer"></section>
-
-      <section id="adminPanel" class="panel hidden">
-        <h2>后台管理</h2>
-        <form id="addTableForm" class="form-card">
-          <h3>新增桌位</h3>
-          <label>
-            楼层
-            <select name="floor" required>
-              <option value="一楼">一楼</option>
-              <option value="二楼">二楼</option>
-            </select>
-          </label>
-          <label>
-            桌名
-            <input type="text" name="name" required placeholder="例如：一楼11" />
-          </label>
-          <label>
-            座位数
-            <input type="number" name="seats" required min="1" value="4" />
-          </label>
-          <button type="submit">新增</button>
-          <p class="hint">提示：可以用后台管理修改桌名与座位数。</p>
-        </form>
-        <div id="tableList"></div>
-      </section>
     </main>
 
     <div id="overlay" class="overlay hidden"></div>

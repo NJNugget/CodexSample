@@ -1,9 +1,5 @@
 const floorsContainer = document.getElementById('floorsContainer');
 const refreshButton = document.getElementById('refreshButton');
-const toggleAdminButton = document.getElementById('toggleAdmin');
-const adminPanel = document.getElementById('adminPanel');
-const addTableForm = document.getElementById('addTableForm');
-const tableList = document.getElementById('tableList');
 const overlay = document.getElementById('overlay');
 const modal = document.getElementById('reservationModal');
 const closeModalButton = document.getElementById('closeModal');
@@ -43,7 +39,7 @@ async function fetchTables(showError = true) {
 
 function renderAll() {
   renderFloors();
-  renderAdminTableList();
+
   if (currentTableId) {
     const table = appState.tables.find((item) => item.id === currentTableId);
     if (table) {
@@ -354,107 +350,6 @@ async function handleCancel(reservationId) {
   }
 }
 
-function renderAdminTableList() {
-  tableList.innerHTML = '';
-  appState.tables.forEach((table) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'table-manage-item';
-
-    const info = document.createElement('div');
-    info.textContent = `${table.floor} · ${table.name} · ${table.seats}座`;
-
-    const form = document.createElement('form');
-    form.innerHTML = `
-      <input type="text" name="name" value="${table.name}" required />
-      <input type="number" name="seats" value="${table.seats}" min="1" required />
-      <button type="submit">保存</button>
-      <button type="button" class="danger">删除</button>
-    `;
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const formData = new FormData(form);
-      const payload = {
-        name: formData.get('name'),
-        seats: Number(formData.get('seats')),
-      };
-      try {
-        const response = await fetch(`/api/admin/tables/${table.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(error.error || '更新失败');
-        }
-        await fetchTables(false);
-      } catch (error) {
-        alert(error.message);
-      }
-    });
-
-    const deleteButton = form.querySelector('button.danger');
-    deleteButton.addEventListener('click', async () => {
-      if (!confirm('确定删除该桌位及相关预定吗？')) {
-        return;
-      }
-      try {
-        const response = await fetch(`/api/admin/tables/${table.id}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(error.error || '删除失败');
-        }
-        if (currentTableId === table.id) {
-          closeModal();
-        }
-        await fetchTables(false);
-      } catch (error) {
-        alert(error.message);
-      }
-    });
-
-    wrapper.appendChild(info);
-    wrapper.appendChild(form);
-    tableList.appendChild(wrapper);
-  });
-}
-
-refreshButton.addEventListener('click', () => fetchTables());
-
-toggleAdminButton.addEventListener('click', () => {
-  adminPanel.classList.toggle('hidden');
-});
-
-overlay.addEventListener('click', closeModal);
-closeModalButton.addEventListener('click', closeModal);
-
-addTableForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const formData = new FormData(addTableForm);
-  const payload = {
-    floor: formData.get('floor'),
-    name: formData.get('name'),
-    seats: Number(formData.get('seats')),
-  };
-  try {
-    const response = await fetch('/api/admin/tables', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || '新增桌位失败');
-    }
-    addTableForm.reset();
-    await fetchTables(false);
-  } catch (error) {
-    alert(error.message);
-  }
-});
 
 reservationForm.addEventListener('submit', async (event) => {
   event.preventDefault();
