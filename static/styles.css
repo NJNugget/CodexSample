@@ -75,7 +75,7 @@ button.secondary {
 main {
   padding: 1.5rem 2rem 4rem;
   display: grid;
-  gap: 2rem;
+  gap: 3rem;
 }
 
 .floor-section {
@@ -437,6 +437,7 @@ button.danger {
 
   main {
     padding: 1.5rem;
+    gap: 2rem;
   }
 
   .modal {

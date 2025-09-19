@@ -112,6 +112,19 @@ if (reservationForm) {
   });
 }
 
+if (startTimeInput) {
+  startTimeInput.addEventListener('click', () => {
+    if (typeof startTimeInput.showPicker === 'function') {
+      startTimeInput.showPicker();
+    }
+  });
+  const enforceQuarter = () => {
+    startTimeInput.value = alignToQuarter(startTimeInput.value);
+  };
+  startTimeInput.addEventListener('change', enforceQuarter);
+  startTimeInput.addEventListener('blur', enforceQuarter);
+}
+
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
     closeModal();
