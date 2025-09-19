@@ -58,6 +58,13 @@ button:hover {
   box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+  box-shadow: none;
+}
+
 button.secondary {
   background: white;
   color: var(--text-color);
@@ -121,6 +128,30 @@ main {
   font-size: 0.9rem;
 }
 
+.table-card .table-seats.has-reservation {
+  color: #1b5e20;
+  font-weight: 600;
+}
+
+.table-card.overdue {
+  box-shadow: 0 0 0 2px rgba(142, 36, 170, 0.3);
+  border-color: #8e24aa !important;
+}
+
+.table-card.overdue .next-reservation {
+  color: #6a1b9a;
+  font-weight: 600;
+}
+
+.phone-tail {
+  margin-top: 0.4rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #37474f;
+  text-align: right;
+}
+
 .table-card .next-reservation {
   margin-top: 0.6rem;
   font-size: 0.85rem;
@@ -164,6 +195,31 @@ textarea {
 
 textarea {
   resize: vertical;
+}
+
+.datetime-input {
+  width: 100%;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.form-status {
+  background: rgba(76, 175, 80, 0.15);
+  color: #2e7d32;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.form-actions button {
+  min-width: 110px;
 }
 
 .hint {
@@ -265,6 +321,11 @@ textarea {
   align-items: center;
 }
 
+.reservation-item.overdue {
+  border-left: 4px solid #8e24aa;
+  background: rgba(142, 36, 170, 0.08);
+}
+
 .reservation-main {
   display: grid;
   gap: 0.3rem;
@@ -293,6 +354,8 @@ textarea {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .reservation-actions button {
@@ -302,6 +365,67 @@ textarea {
 
 button.danger {
   background: var(--danger);
+}
+
+.legend {
+  margin: 3rem 2rem 4rem;
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+}
+
+.legend h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.legend ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.legend-chip {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.4rem;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+.legend-green {
+  background: #e8f5e9;
+  border-color: #4caf50;
+}
+
+.legend-purple {
+  background: #f3e5f5;
+  border-color: #8e24aa;
+}
+
+.legend-yellow {
+  background: #fff8e1;
+  border-color: #f9a825;
+}
+
+.legend-light-red {
+  background: #ffe5e5;
+  border-color: #ef5350;
+}
+
+.legend-red {
+  background: #ffebee;
+  border-color: #d32f2f;
 }
 
 @media (max-width: 768px) {
@@ -319,5 +443,9 @@ button.danger {
     inset: 5% 1rem auto 1rem;
     transform: none;
     width: auto;
+  }
+
+  .legend {
+    margin: 2rem 1rem 3rem;
   }
 }

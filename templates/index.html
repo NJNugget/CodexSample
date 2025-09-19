@@ -10,7 +10,8 @@
     <header class="app-header">
       <h1>餐厅预订管理系统</h1>
       <div class="toolbar">
-
+        <button id="clearReservations" class="secondary" type="button">清除预定</button>
+        <button id="openAdmin" class="secondary" type="button">后台管理</button>
       </div>
     </header>
 
@@ -31,9 +32,17 @@
           <h3>新增预定</h3>
           <form id="reservationForm">
             <input type="hidden" name="table_id" />
+            <input type="hidden" name="reservation_id" />
+            <div id="formStatus" class="form-status hidden">正在编辑已有预定</div>
             <label>
               预定时间
-              <input type="datetime-local" name="start_time" required />
+              <input
+                type="datetime-local"
+                name="start_time"
+                required
+                step="900"
+                class="datetime-input"
+              />
             </label>
             <label>
               客人姓名
@@ -51,7 +60,10 @@
               备注
               <textarea name="notes" rows="2" placeholder="过敏情况、特殊需求等"></textarea>
             </label>
-            <button type="submit">保存预定</button>
+            <div class="form-actions">
+              <button id="cancelEdit" type="button" class="secondary hidden">取消编辑</button>
+              <button type="submit">保存预定</button>
+            </div>
           </form>
         </section>
 
@@ -72,6 +84,18 @@
         <div class="reservation-actions"></div>
       </article>
     </template>
+
+    <section class="legend" aria-label="预定颜色说明">
+      <h3>颜色说明</h3>
+      <ul>
+        <li><span class="legend-chip legend-purple"></span> 预定开始时间已超过当前时间</li>
+        <li><span class="legend-chip legend-green"></span> 距离预定时间 24 小时内（但超过 3 小时）</li>
+        <li><span class="legend-chip legend-yellow"></span> 距离预定时间 3 小时内</li>
+        <li><span class="legend-chip legend-light-red"></span> 距离预定时间 30 分钟内</li>
+        <li><span class="legend-chip legend-red"></span> 距离预定时间 10 分钟内</li>
+      </ul>
+      <p class="hint">距离预定时间超过 24 小时或没有预定时，卡片保持默认颜色。</p>
+    </section>
 
     <script src="/static/app.js" defer></script>
   </body>

@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import json
+import re
 import threading
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 DATA_FILE = Path(__file__).with_name("data.json")
 _LOCK = threading.Lock()
+FLOOR_ORDER = {"一楼": 0, "二楼": 1}
 
 
 def _now() -> datetime:
@@ -63,26 +65,34 @@ def _save_state(state: Dict) -> None:
 
 
 def _auto_archive_overdue(state: Dict) -> bool:
-    """Archive reservations that are overdue for more than 15 minutes."""
-    changed = False
-    now = _now()
-    cutoff = now - timedelta(minutes=15)
-    for reservation in state.get("reservations", []):
-        status = reservation.get("status", "active")
-        if status != "active":
+    """Legacy helper retained for compatibility; no automatic archiving now."""
+    return False
+
+
+def _natural_key(value: str) -> Tuple[Any, ...]:
+    value = value or ""
+    parts = re.split(r"(\d+)", value)
+    key: List[Any] = []
+    for part in parts:
+        if not part:
             continue
-        start_time = reservation.get("start_time")
-        if not start_time:
-            continue
-        try:
-            dt = datetime.fromisoformat(start_time)
-        except ValueError:
-            continue
-        if dt <= cutoff:
-            reservation["status"] = "archived"
-            reservation["archived_at"] = now.isoformat(timespec="seconds")
-            changed = True
-    return changed
+        if part.isdigit():
+            key.append(int(part))
+        else:
+            key.append(part)
+    if not key:
+        key.append(value)
+    return tuple(key)
+
+
+def _table_sort_key(table: Dict) -> Tuple[Any, ...]:
+    floor = table.get("floor", "")
+    name = table.get("name", "")
+    return (
+        FLOOR_ORDER.get(floor, len(FLOOR_ORDER)),
+        _natural_key(name),
+        name,
+    )
 
 
 def list_tables_with_reservations() -> List[Dict]:
@@ -105,7 +115,7 @@ def list_tables_with_reservations() -> List[Dict]:
         for table in table_map.values():
             table["reservations"].sort(key=lambda r: r.get("start_time", ""))
 
-        return sorted(table_map.values(), key=lambda t: (t.get("floor", ""), t.get("name", "")))
+        return sorted(table_map.values(), key=_table_sort_key)
 
 
 def get_table(table_id: str) -> Optional[Dict]:
@@ -224,6 +234,86 @@ def create_reservation(
         return dict(reservation)
 
 
+def update_reservation(
+    reservation_id: str,
+    *,
+    table_id: Optional[str] = None,
+    start_time: Optional[str] = None,
+    guest_name: Optional[str] = None,
+    phone: Optional[str] = None,
+    party_size: Optional[int] = None,
+    notes: Optional[str] = None,
+) -> Dict:
+    if not reservation_id:
+        raise ValueError("缺少预定编号")
+
+    parsed_start: Optional[datetime] = None
+    if start_time is not None:
+        if not start_time:
+            raise ValueError("预定时间不能为空")
+        try:
+            parsed_start = datetime.fromisoformat(start_time)
+        except ValueError as exc:
+            raise ValueError("预定时间格式无效") from exc
+
+    if guest_name is not None and not guest_name.strip():
+        raise ValueError("客人姓名不能为空")
+
+    if phone is not None and not phone.strip():
+        raise ValueError("手机号不能为空")
+
+    party_size_int: Optional[int] = None
+    if party_size is not None:
+        party_size_int = int(party_size)
+        if party_size_int <= 0:
+            raise ValueError("预定人数必须大于0")
+
+    with _LOCK:
+        state = _load_state()
+
+        if table_id is not None and not any(tbl["id"] == table_id for tbl in state.get("tables", [])):
+            raise ValueError("桌位不存在")
+
+        for reservation in state.get("reservations", []):
+            if reservation["id"] != reservation_id:
+                continue
+
+            if reservation.get("status", "active") != "active":
+                raise ValueError("只能修改未完成的预定")
+
+            if table_id is not None:
+                reservation["table_id"] = table_id
+
+            if parsed_start is not None:
+                reservation["start_time"] = parsed_start.isoformat(timespec="minutes")
+
+            if guest_name is not None:
+                reservation["guest_name"] = guest_name.strip()
+
+            if phone is not None:
+                reservation["phone"] = phone.strip()
+
+            if party_size_int is not None:
+                reservation["party_size"] = party_size_int
+
+            if notes is not None:
+                reservation["notes"] = notes.strip()
+
+            _save_state(state)
+            return dict(reservation)
+
+    raise ValueError("预定不存在")
+
+
+def clear_reservations() -> None:
+    with _LOCK:
+        state = _load_state()
+        if not state.get("reservations"):
+            return
+        state["reservations"] = []
+        _save_state(state)
+
+
 def cancel_reservation(reservation_id: str) -> None:
     with _LOCK:
         state = _load_state()
@@ -247,5 +337,3 @@ def mark_reservation_arrived(reservation_id: str) -> Dict:
                 _save_state(state)
                 return dict(reservation)
     raise ValueError("预定不存在")
-
-
