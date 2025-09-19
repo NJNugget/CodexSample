@@ -1,6 +1,5 @@
 const floorsContainer = document.getElementById('floorsContainer');
 const refreshButton = document.getElementById('refreshButton');
-const openAdminButton = document.getElementById('openAdmin');
 const overlay = document.getElementById('overlay');
 const modal = document.getElementById('reservationModal');
 const closeModalButton = document.getElementById('closeModal');
@@ -40,6 +39,7 @@ async function fetchTables(showError = true) {
 
 function renderAll() {
   renderFloors();
+
   if (currentTableId) {
     const table = appState.tables.find((item) => item.id === currentTableId);
     if (table) {
@@ -350,16 +350,6 @@ async function handleCancel(reservationId) {
   }
 }
 
-refreshButton.addEventListener('click', () => fetchTables());
-
-if (openAdminButton) {
-  openAdminButton.addEventListener('click', () => {
-    window.location.href = '/admin';
-  });
-}
-
-overlay.addEventListener('click', closeModal);
-closeModalButton.addEventListener('click', closeModal);
 
 reservationForm.addEventListener('submit', async (event) => {
   event.preventDefault();
